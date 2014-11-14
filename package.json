@@ -1,0 +1,15 @@
+{
+  "name": "hapi-redirects",
+  "description": "Hapi redirects",
+  "author": "First+Third",
+  "homepage": "https://github.com/firstandthird/hapi-redirects",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/firstandthird/hapi-redirects.git"
+  },
+  "devDependencies": {
+    "hapi": "^7.5.2"
+  }
+}
