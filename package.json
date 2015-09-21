@@ -10,6 +10,6 @@
     "url": "https://github.com/firstandthird/hapi-redirects.git"
   },
   "devDependencies": {
-    "hapi": "^7.5.2"
+    "hapi": "^8.0.0"
   }
 }

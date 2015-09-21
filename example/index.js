@@ -1,15 +1,22 @@
 var Hapi = require('hapi');
-var port = process.env.PORT || 8080;
-var server = new Hapi.Server(port, '0.0.0.0');
+var port = process.env.PORT || 8081;
+var server = new Hapi.Server({
+  debug: {
+    log: ['hapi-redirects', 'error'],
+    request: ['tail', 'error']
+  }
+});
+server.connection({ port: port });
 
-server.pack.register([
+server.register([
   {
-    plugin: require('../'),
+    register: require('../'),
     options: {
       redirects: {
         '/test': '/it/works',
         '/something/else': '/it/works',
-        '/': '/it/works?test=1'
+        '/': '/it/works?test=1',
+        '/test/{param}': '/it/works'
       }
     }
   }
@@ -23,7 +30,7 @@ server.pack.register([
       method: 'GET',
       path: '/it/works',
       handler: function(request, reply) {
-        reply('redirects totally working')
+        reply('redirects totally working');
       }
     }
   ]);
