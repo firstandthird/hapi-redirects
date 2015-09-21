@@ -13,6 +13,7 @@ server.register([
     register: require('../'),
     options: {
       log: true,
+      log404: true,
       redirects: {
         '/test': '/it/works',
         '/something/else': '/it/works',
