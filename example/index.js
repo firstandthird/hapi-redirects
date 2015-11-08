@@ -19,6 +19,13 @@ server.register([
         '/something/else': '/it/works',
         '/': '/it/works?test=1',
         '/test/{param}': '/it/works'
+      },
+      vhosts: {
+        'blahblah.com.localhost': {
+          '/test': '/newtest',
+          '/post/(.*)/': '/newtest',
+          '/*' : '/newtest',
+        }
       }
     }
   }
@@ -33,6 +40,14 @@ server.register([
       path: '/it/works',
       handler: function(request, reply) {
         reply('redirects totally working');
+      }
+    },
+    {
+      method: 'GET',
+      path: '/newtest',
+      handler: function(request, reply) {
+        console.log(request.params)
+       reply('vhost redirects totally working ');
       }
     }
   ]);
