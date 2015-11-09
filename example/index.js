@@ -18,7 +18,7 @@ server.register([
         '/test': '/it/works',
         '/something/else': '/it/works',
         '/': '/it/works?test=1',
-        '/test/{param}': '/newtest/{param}'
+        '/test/{param*2}': '/newtest/{param*2}'
       }
     }
   }
@@ -37,10 +37,10 @@ server.register([
     },
     {
       method: 'GET',
-      path: '/newtest/{param}',
+      path: '/newtest/{param*2}',
       handler: function(request, reply) {
         console.log(request.params)
-       reply('redirects totally working and param passed was ' + request.params.param);
+        reply('redirects totally working and param passed was ' + request.params.param);
       }
     }
   ]);
