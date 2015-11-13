@@ -18,7 +18,7 @@ server.register([
         '/test': '/it/works',
         '/something/else': '/it/works',
         '/': '/it/works?test=1',
-        '/test/{param}': '/it/works'
+        '/test/{param*2}': '/newtest/{param*2}'
       },
       vhosts: {
         'blahblah.com.localhost': {
@@ -48,6 +48,14 @@ server.register([
       handler: function(request, reply) {
         console.log(request.params)
        reply('vhost redirects totally working ');
+      }
+    },
+    {
+      method: 'GET',
+      path: '/newtest/{param*2}',
+      handler: function(request, reply) {
+        console.log(request.params)
+        reply('redirects totally working and param passed was ' + request.params.param);
       }
     }
   ]);
