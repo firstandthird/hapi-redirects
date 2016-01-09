@@ -3,7 +3,6 @@ var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var Hapi = require('hapi');
 var module = require("../index.js");
-var request = require("request");
 
 lab.experiment('hapi-redirect', function() {
   var server;
@@ -158,6 +157,41 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
+  lab.test('expose plugin', function(done){
+    server.register({
+      register : module,
+      options : {
+        log : true,
+        log404: true
+      }
+    }, function(err){
+      server.plugins['hapi-redirects'].register({
+        redirects: {
+          '/test': '/it/works'
+        },
+        vhosts: {
+          'blahblah.com.localhost': {
+            '/test': '/newtest',
+          }
+        }
+      }, function(){
+        server.start(function(){
+          server.inject({
+            method: 'get',
+            url: '/test',
+            headers: {
+               'Host': 'blahblah.com.localhost'
+            }
+          }, function(result){
+            Code.expect(result.statusCode).to.equal(302);
+            Code.expect(result.headers.location).to.equal('/newtest');
+            done();
+          });
+        });
+      });
+    });
+  });
+  /*
   lab.test(' register route', function(done){
     server.register({
       register : module,
@@ -203,4 +237,5 @@ lab.experiment('hapi-redirect', function() {
       });
     });
   });
+  */
 });
