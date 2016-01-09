@@ -191,51 +191,5 @@ lab.experiment('hapi-redirect', function() {
       });
     });
   });
-  /*
-  lab.test(' register route', function(done){
-    server.register({
-      register : module,
-      options : {
-        log : true,
-        log404: true
-      },
-    }, function(result){
-      server.start(function(err){
-        server.inject({
-          method: 'post',
-          url: '/registerRedirect',
-          payload : {
-            redirects: {
-              '/dynamic_test': '/it/works'
-            },
-            vhosts: {
-              'blahblah.com.localhost': {
-                '/domain_test': '/newtest',
-              }
-            }
-          }
-        }, function(result){
-          server.inject({
-            method: 'GET',
-            url : "/dynamic_test"
-          }, function(result){
-            Code.expect(result.statusCode).to.equal(302);
-            Code.expect(result.headers.location).to.equal('/it/works');
-            server.inject({
-              method: 'get',
-              url: '/domain_test',
-              headers: {
-                 'Host': 'blahblah.com.localhost'
-              }
-            }, function(result){
-              Code.expect(result.statusCode).to.equal(302);
-              Code.expect(result.headers.location).to.equal('/newtest');
-              done();
-            });
-          });
-        });
-      });
-    });
-  });
-  */
+
 });
