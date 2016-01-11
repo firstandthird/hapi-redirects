@@ -9,7 +9,15 @@
     "type": "git",
     "url": "https://github.com/firstandthird/hapi-redirects.git"
   },
+  "scripts": {
+    "test": "lab -t 100 test"
+  },
   "devDependencies": {
-    "hapi": "^8.0.0"
+    "code": "^2.0.1",
+    "hapi": "^8.0.0",
+    "lab": "^7.3.0"
+  },
+  "dependencies": {
+    "lodash": "^3.10.1"
   }
 }
