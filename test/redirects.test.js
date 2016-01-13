@@ -96,6 +96,30 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
+  lab.test(' /?query=1 -> /it/works?query=1', function(done){
+    server.register({
+      register : module,
+      options : {
+        appendQueryString: true,
+        redirects: {
+          '/': '/it/works',
+        },
+      }
+    },
+    function(err){
+      server.start(function(){
+        server.inject({
+          method: 'get',
+          url: '/?query=1'
+        }, function(result){
+          Code.expect(result.statusCode).to.equal(301);
+          Code.expect(result.headers.location).to.equal('/it/works?query=1');
+          done();
+        });
+      });
+    });
+  });
+
   lab.test(' /test/{params*2} -> /newtest/{param*2}', function(done){
     server.register({
       register : module,
