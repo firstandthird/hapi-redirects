@@ -33,7 +33,8 @@ lab.experiment('hapi-redirect', function() {
         }
       }
     ]);
-    done();
+
+    server.start(done);
   });
 
   lab.afterEach(function(done){
@@ -94,6 +95,30 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
+  lab.test(' / -> /to/{params*}', { skip: true }, function(done){
+    server.register({
+      register : module,
+      options : {
+        appendQueryString: false,
+        redirects: {
+          '/{params*}': '/to/{params*}',
+        },
+      }
+    },
+    function(err){
+      server.start(function(){
+        server.inject({
+          method: 'get',
+          url: '/'
+        }, function(result){
+          Code.expect(result.statusCode).to.equal(301);
+          Code.expect(result.headers.location).to.equal('/to');
+          done();
+        });
+      });
+    });
+  });
+
   lab.test(' /?query=1 -> /it/works?query=1', function(done){
     server.register({
       register : module,
@@ -111,6 +136,52 @@ lab.experiment('hapi-redirect', function() {
         }, function(result){
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/it/works?query=1');
+          done();
+        });
+      });
+    });
+  });
+
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', function(done){
+    server.register({
+      register : module,
+      options : {
+        redirects: {
+          '/from/{param*}': '/to/{param*}',
+        },
+      }
+    },
+    function(err){
+      server.start(function(){
+        server.inject({
+          method: 'get',
+          url: '/from/test?query=1'
+        }, function(result){
+          Code.expect(result.statusCode).to.equal(301);
+          Code.expect(result.headers.location).to.equal('/to/test?query=1');
+          done();
+        });
+      });
+    });
+  });
+
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', { skip: true }, function(done){
+    server.register({
+      register : module,
+      options : {
+        redirects: {
+          '/from/{param*}': '/to/{param*}',
+        },
+      }
+    },
+    function(err){
+      server.start(function(){
+        server.inject({
+          method: 'get',
+          url: '/from?query=1'
+        }, function(result){
+          Code.expect(result.statusCode).to.equal(301);
+          Code.expect(result.headers.location).to.equal('/to?query=1');
           done();
         });
       });
