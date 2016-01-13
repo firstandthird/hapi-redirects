@@ -10,10 +10,14 @@
     "url": "https://github.com/firstandthird/hapi-redirects.git"
   },
   "scripts": {
-    "test": "lab -t 100 test"
+    "test": "lab -t 100 test",
+    "lint": "eslint **/*.js"
   },
   "devDependencies": {
     "code": "^2.0.1",
+    "eslint": "^1.10.3",
+    "eslint-config-airbnb": "^3.1.0",
+    "eslint-config-firstandthird": "^1.0.0",
     "hapi": "^8.0.0",
     "lab": "^7.3.0"
   },
