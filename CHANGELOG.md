@@ -1,4 +1,15 @@
 
+3.0.0 / 2016-01-13
+==================
+
+  * verbose option to log each redirect that is registered
+  * default to appendQueryString
+  * set default status code to 301
+  * added option to appendQueryString
+  * added defaults.  fixes #17
+  * initial work on linting
+  * added eslintrc
+
 2.0.0 / 2016-01-13
 ==================
 
