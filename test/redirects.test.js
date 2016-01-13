@@ -98,7 +98,6 @@ lab.experiment('hapi-redirect', function() {
     server.register({
       register : module,
       options : {
-        appendQueryString: true,
         redirects: {
           '/': '/it/works',
         },
