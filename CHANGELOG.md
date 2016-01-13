@@ -1,4 +1,12 @@
 
+2.0.0 / 2016-01-13
+==================
+
+  * vhost support
+  * log referral
+  * expose register function to dynamically add redirects
+  * support {params} in redirect to urls
+
 1.0.1 / 2015-09-21
 ==================
 
