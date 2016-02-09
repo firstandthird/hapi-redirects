@@ -8,7 +8,13 @@ lab.experiment('hapi-redirect', function() {
   var server;
 
   lab.beforeEach(function(done) {
-    server = new Hapi.Server();
+    server = new Hapi.Server({
+      connections : {
+        router : {
+          stripTrailingSlash : true
+        }
+      }
+    });
     server.connection();
     server.route([
       {
@@ -61,7 +67,38 @@ lab.experiment('hapi-redirect', function() {
           Code.expect(result.headers.location).to.equal('/it/works');
           server.inject({
             method: 'get',
-            url: '/something/else'
+            url: '/something/else/'
+          }, function(result){
+            Code.expect(result.statusCode).to.equal(301);
+            Code.expect(result.headers.location).to.equal('/it/works');
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  lab.test(' /test/ -> /it/works   /something/else/ -> /it/works (handles trailing slash)', function(done){
+    server.register({
+      register : module,
+      options : {
+        redirects: {
+          '/test': '/it/works',
+          '/something/else': '/it/works'
+        },
+      }
+    },
+    function(err){
+      server.start(function(){
+        server.inject({
+          method: 'get',
+          url: '/test/'
+        }, function(result){
+          Code.expect(result.statusCode).to.equal(301);
+          Code.expect(result.headers.location).to.equal('/it/works');
+          server.inject({
+            method: 'get',
+            url: '/something/else/'
           }, function(result){
             Code.expect(result.statusCode).to.equal(301);
             Code.expect(result.headers.location).to.equal('/it/works');
@@ -249,7 +286,7 @@ lab.experiment('hapi-redirect', function() {
         vhosts: {
           'blahblah.com.localhost': {
             '/test': '/newtest',
-            '/post/(.*)/': '/newtest',
+            '/post/(.*)': '/newtest',
             '/*' : '/newtest',
           }
         }
