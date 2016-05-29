@@ -1,12 +1,12 @@
-var Hapi = require('hapi');
-var port = process.env.PORT || 8081;
-var server = new Hapi.Server({
+const Hapi = require('hapi');
+const port = process.env.PORT || 8081;
+const server = new Hapi.Server({
   debug: {
     log: ['hapi-redirects', 'error'],
     request: ['tail', 'error']
   }
 });
-server.connection({ port: port });
+server.connection({ port });
 
 server.register([
   {
@@ -24,12 +24,12 @@ server.register([
         'blahblah.com.localhost': {
           '/test': '/newtest',
           '/post/(.*)/': '/newtest',
-          '/*' : '/newtest',
+          '/*': '/newtest',
         }
       }
     }
   }
-], function(err) {
+], (err) => {
   if (err) {
     throw err;
   }
@@ -38,28 +38,28 @@ server.register([
     {
       method: 'GET',
       path: '/it/works',
-      handler: function(request, reply) {
+      handler: (request, reply) => {
         reply('redirects totally working');
       }
     },
     {
       method: 'GET',
       path: '/newtest',
-      handler: function(request, reply) {
-        console.log(request.params)
-       reply('vhost redirects totally working ');
+      handler: (request, reply) => {
+        console.log(request.params);
+        reply('vhost redirects totally working ');
       }
     },
     {
       method: 'GET',
       path: '/newtest/{param*2}',
-      handler: function(request, reply) {
-        console.log(request.params)
-        reply('redirects totally working and param passed was ' + request.params.param);
+      handler: (request, reply) => {
+        console.log(request.params);
+        reply(`redirects totally working and param passed was ${request.params.param}`);
       }
     }
   ]);
-  server.start(function() {
-    console.log('Hapi server started @', server.info.uri);
+  server.start(() => {
+    console.log(`Hapi server started @ ${server.info.uri}`);
   });
 });
