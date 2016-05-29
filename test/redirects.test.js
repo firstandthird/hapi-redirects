@@ -1,35 +1,36 @@
-var Code = require('code');   // assertion library
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-var Hapi = require('hapi');
-var module = require("../index.js");
+'use strict';
+const Code = require('code');   // assertion library
+const Lab = require('lab');
+const lab = exports.lab = Lab.script();
+const Hapi = require('hapi');
+const redirectModule = require('../index.js');
 
-lab.experiment('hapi-redirect', function() {
-  var server;
+lab.experiment('hapi-redirect', () => {
+  let server;
 
-  lab.beforeEach(function(done) {
+  lab.beforeEach((done) => {
     server = new Hapi.Server();
     server.connection();
     server.route([
       {
         method: 'GET',
         path: '/it/works',
-        handler: function(request, reply) {
+        handler: (request, reply) => {
           reply('redirects totally working');
         }
       },
       {
         method: 'GET',
         path: '/newtest',
-        handler: function(request, reply) {
+        handler: (request, reply) => {
           reply('vhost redirects totally working ');
         }
       },
       {
         method: 'GET',
         path: '/newtest/{param*2}',
-        handler: function(request, reply) {
-          reply('redirects totally working and param passed was ' + request.params.param);
+        handler: (request, reply) => {
+          reply(`redirects totally working and param passed was ${request.params.param}`);
         }
       }
     ]);
@@ -37,34 +38,34 @@ lab.experiment('hapi-redirect', function() {
     server.start(done);
   });
 
-  lab.afterEach(function(done){
+  lab.afterEach((done) => {
     server.stop(done);
   });
 
-  lab.test(' /test -> /it/works   /something/else -> /it/works', function(done){
+  lab.test(' /test -> /it/works   /something/else -> /it/works', (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         redirects: {
           '/test': '/it/works',
           '/something/else': '/it/works'
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/test'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/it/works');
           server.inject({
             method: 'get',
             url: '/something/else'
-          }, function(result){
-            Code.expect(result.statusCode).to.equal(301);
-            Code.expect(result.headers.location).to.equal('/it/works');
+          }, (testResult) => {
+            Code.expect(testResult.statusCode).to.equal(301);
+            Code.expect(testResult.headers.location).to.equal('/it/works');
             done();
           });
         });
@@ -72,21 +73,21 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' / -> /it/works?test=1', function(done){
+  lab.test(' / -> /it/works?test=1', (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         redirects: {
           '/': '/it/works?test=1',
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/it/works?test=1');
           done();
@@ -95,22 +96,22 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' / -> /to/{params*}', { skip: true }, function(done){
+  lab.test(' / -> /to/{params*}', { skip: true }, (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         appendQueryString: false,
         redirects: {
           '/{params*}': '/to/{params*}',
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/to');
           done();
@@ -119,21 +120,21 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' /?query=1 -> /it/works?query=1', function(done){
+  lab.test(' /?query=1 -> /it/works?query=1', (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         redirects: {
           '/': '/it/works',
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/?query=1'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/it/works?query=1');
           done();
@@ -142,21 +143,21 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', function(done){
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         redirects: {
           '/from/{param*}': '/to/{param*}',
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/from/test?query=1'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/to/test?query=1');
           done();
@@ -165,21 +166,21 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', { skip: true }, function(done){
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', { skip: true }, (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         redirects: {
           '/from/{param*}': '/to/{param*}',
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/from?query=1'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/to?query=1');
           done();
@@ -188,22 +189,22 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test('set default status code', function(done){
+  lab.test('set default status code', (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         statusCode: 302,
         redirects: {
           '/': '/it/works',
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/'
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(302);
           done();
         });
@@ -211,24 +212,24 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' /test/{params*2} -> /newtest/{param*2}', function(done){
+  lab.test(' /test/{params*2} -> /newtest/{param*2}', (done) => {
     server.register({
-      register : module,
-      options : {
+      register: redirectModule,
+      options: {
         redirects: {
           '/test/{param*2}': '/newtest/{param*2}'
         },
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/test/param1/param2',
           headers: {
-            'Host': 'en.example.com'
+            Host: 'en.example.com'
           },
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
           done();
@@ -237,11 +238,11 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test(' blahblah.localhost.com/test -> /newtest', function(done){
+  lab.test(' blahblah.localhost.com/test -> /newtest', (done) => {
     server.register({
-      register : module,
-      options : {
-        log : true,
+      register: redirectModule,
+      options: {
+        log: true,
         log404: true,
         redirects: {
           '/test': '/it/works'
@@ -250,20 +251,20 @@ lab.experiment('hapi-redirect', function() {
           'blahblah.com.localhost': {
             '/test': '/newtest',
             '/post/(.*)/': '/newtest',
-            '/*' : '/newtest',
+            '/*': '/newtest',
           }
         }
       }
     },
-    function(err){
-      server.start(function(){
+    () => {
+      server.start(() => {
         server.inject({
           method: 'get',
           url: '/test',
           headers: {
-             'Host': 'blahblah.com.localhost'
+            Host: 'blahblah.com.localhost'
           }
-        }, function(result){
+        }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/newtest');
           done();
@@ -272,14 +273,14 @@ lab.experiment('hapi-redirect', function() {
     });
   });
 
-  lab.test('expose plugin', function(done){
+  lab.test('expose plugin', (done) => {
     server.register({
-      register : module,
-      options : {
-        log : true,
+      register: redirectModule,
+      options: {
+        log: true,
         log404: true
       }
-    }, function(err){
+    }, () => {
       server.plugins['hapi-redirects'].register({
         redirects: {
           '/test': '/it/works'
@@ -289,15 +290,15 @@ lab.experiment('hapi-redirect', function() {
             '/test': '/newtest',
           }
         }
-      }, function(){
-        server.start(function(){
+      }, () => {
+        server.start(() => {
           server.inject({
             method: 'get',
             url: '/test',
             headers: {
-               'Host': 'blahblah.com.localhost'
+              Host: 'blahblah.com.localhost'
             }
-          }, function(result){
+          }, (result) => {
             Code.expect(result.statusCode).to.equal(301);
             Code.expect(result.headers.location).to.equal('/newtest');
             done();
@@ -306,5 +307,4 @@ lab.experiment('hapi-redirect', function() {
       });
     });
   });
-
 });
