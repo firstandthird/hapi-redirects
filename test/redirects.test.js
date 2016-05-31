@@ -188,29 +188,6 @@ lab.experiment('hapi-redirect', () => {
     });
   });
 
-  lab.test('set default status code', (done) => {
-    server.register({
-      register: redirectModule,
-      options: {
-        statusCode: 302,
-        redirects: {
-          '/': '/it/works',
-        },
-      }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(302);
-          done();
-        });
-      });
-    });
-  });
-
   lab.test(' /test/{params*2} -> /newtest/{param*2}', (done) => {
     server.register({
       register: redirectModule,
@@ -306,7 +283,31 @@ lab.experiment('hapi-redirect', () => {
       });
     });
   });
-  lab.test(' /test -> /it/works   /something/else -> /it/works', (done) => {
+
+  lab.test('set default status code', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+        statusCode: 302,
+        redirects: {
+          '/': '/it/works',
+        },
+      }
+    },
+    () => {
+      server.start(() => {
+        server.inject({
+          method: 'get',
+          url: '/'
+        }, (result) => {
+          Code.expect(result.statusCode).to.equal(302);
+          done();
+        });
+      });
+    });
+  });
+
+  lab.test(' set status code for specific route (without params)', (done) => {
     server.register({
       register: redirectModule,
       options: {
@@ -326,6 +327,70 @@ lab.experiment('hapi-redirect', () => {
         }, (result) => {
           Code.expect(result.statusCode).to.equal(302);
           Code.expect(result.headers.location).to.equal('/it/works');
+          done();
+        });
+      });
+    });
+  });
+
+  lab.test(' set status code for specific route (with params)', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+        redirects: {
+          '/test/{param*2}': {
+            destination: '/newtest/{param*2}',
+            statusCode: 302
+          }
+        },
+      }
+    },
+    () => {
+      server.start(() => {
+        server.inject({
+          method: 'get',
+          url: '/test/param1/param2',
+          headers: {
+            Host: 'en.example.com'
+          },
+        }, (result) => {
+          Code.expect(result.statusCode).to.equal(302);
+          Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
+          done();
+        });
+      });
+    });
+  });
+
+  lab.test(' set status code for specific route (with vhost) ', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+        log: true,
+        log404: true,
+        vhosts: {
+          'blahblah.com.localhost': {
+            '/test': {
+                destination: '/newtest',
+                statusCode: 302
+            },
+            '/post/(.*)/': '/newtest',
+            '/*': '/newtest',
+          }
+        }
+      }
+    },
+    () => {
+      server.start(() => {
+        server.inject({
+          method: 'get',
+          url: '/test',
+          headers: {
+            Host: 'blahblah.com.localhost'
+          }
+        }, (result) => {
+          Code.expect(result.statusCode).to.equal(302);
+          Code.expect(result.headers.location).to.equal('/newtest');
           done();
         });
       });
