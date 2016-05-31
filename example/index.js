@@ -18,7 +18,11 @@ server.register([
         '/test': '/it/works',
         '/something/else': '/it/works',
         '/': '/it/works?test=1',
-        '/test/{param*2}': '/newtest/{param*2}'
+        '/test/{param*2}': '/newtest/{param*2}',
+        '/test302': {
+          destination: '/it/works',
+          statusCode: 302
+        }
       },
       vhosts: {
         'blahblah.com.localhost': {
