@@ -1,4 +1,11 @@
 
+4.0.0 / 2016-05-31
+==================
+
+  * per route statusCodes
+  * es6 / linted version
+  * added tests that need to pass at some point
+
 3.0.0 / 2016-01-13
 ==================
 
