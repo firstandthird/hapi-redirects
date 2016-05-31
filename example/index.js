@@ -20,8 +20,8 @@ server.register([
         '/': '/it/works?test=1',
         '/test/{param*2}': '/newtest/{param*2}',
         '/test302': {
-          path: '/it/works',
-          redirectType: 302
+          destination: '/it/works',
+          statusCode: 302
         }
       },
       vhosts: {
