@@ -312,6 +312,7 @@ lab.experiment('hapi-redirect', () => {
       register: redirectModule,
       options: {
         redirects: {
+          '/test301': '/it/works',
           '/test302': {
             destination: '/it/works',
             statusCode: 302
@@ -327,7 +328,14 @@ lab.experiment('hapi-redirect', () => {
         }, (result) => {
           Code.expect(result.statusCode).to.equal(302);
           Code.expect(result.headers.location).to.equal('/it/works');
-          done();
+          server.inject({
+            method: 'get',
+            url: '/test301'
+          }, (result) => {
+            Code.expect(result.statusCode).to.equal(301);
+            Code.expect(result.headers.location).to.equal('/it/works');
+            done();
+          });
         });
       });
     });
