@@ -1,4 +1,4 @@
-hapi-redirects
+hapi-redirects [![Build Status](https://travis-ci.org/firstandthird/hapi-redirects.svg?branch=master)](https://travis-ci.org/firstandthird/hapi-redirects)
 ==============
 
 Hapi plugin for redirects
