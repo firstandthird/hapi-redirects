@@ -10,7 +10,7 @@
     "url": "https://github.com/firstandthird/hapi-redirects.git"
   },
   "scripts": {
-    "test": "lab -t 100 -e test",
+    "test": "lab -e test",
     "lint": "eslint **/*.js"
   },
   "devDependencies": {
