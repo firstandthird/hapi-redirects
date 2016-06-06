@@ -95,7 +95,8 @@ lab.experiment('hapi-redirect', () => {
     });
   });
 
-  lab.test(' / -> /to/{params*}', { skip: true }, (done) => {
+  lab.test(' / -> /to/{params*}', (done) => {
+
     server.register({
       register: redirectModule,
       options: {
@@ -109,10 +110,10 @@ lab.experiment('hapi-redirect', () => {
       server.start(() => {
         server.inject({
           method: 'get',
-          url: '/'
+          url: '/some/params/here'
         }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/to');
+          Code.expect(result.headers.location).to.equal('/to/some/params/here');
           done();
         });
       });
@@ -165,7 +166,7 @@ lab.experiment('hapi-redirect', () => {
     });
   });
 
-  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', { skip: true }, (done) => {
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', (done) => {
     server.register({
       register: redirectModule,
       options: {
@@ -178,10 +179,10 @@ lab.experiment('hapi-redirect', () => {
       server.start(() => {
         server.inject({
           method: 'get',
-          url: '/from?query=1'
+          url: '/from/myParam?query=1'
         }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/to?query=1');
+          Code.expect(result.headers.location).to.equal('/to/myParam?query=1');
           done();
         });
       });
