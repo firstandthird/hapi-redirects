@@ -14,16 +14,16 @@
     "lint": "eslint **/*.js"
   },
   "devDependencies": {
-    "code": "^2.0.1",
-    "eslint": "^2.9.0",
-    "eslint-config-airbnb": "^8.0.0",
-    "eslint-config-firstandthird": "^2.0.0",
-    "eslint-plugin-import": "^1.5.0",
-    "eslint-plugin-react": "^5.1.1",
-    "hapi": "^8.0.0",
-    "lab": "^7.3.0"
+    "code": "^4.0.0",
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-config-firstandthird": "^3.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-react": "^6.8.0",
+    "hapi": "^16.0.2",
+    "lab": "^11.2.1"
   },
   "dependencies": {
-    "lodash": "^3.10.1"
+    "lodash": "^4.17.2"
   }
 }
