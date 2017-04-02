@@ -1,3 +1,4 @@
+'use strict';
 const Hapi = require('hapi');
 const port = process.env.PORT || 8081;
 const server = new Hapi.Server({

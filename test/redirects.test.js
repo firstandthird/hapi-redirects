@@ -96,7 +96,6 @@ lab.experiment('hapi-redirect', () => {
   });
 
   lab.test(' / -> /to/{params*}', (done) => {
-
     server.register({
       register: redirectModule,
       options: {
@@ -332,9 +331,9 @@ lab.experiment('hapi-redirect', () => {
           server.inject({
             method: 'get',
             url: '/test301'
-          }, (result) => {
-            Code.expect(result.statusCode).to.equal(301);
-            Code.expect(result.headers.location).to.equal('/it/works');
+          }, (result2) => {
+            Code.expect(result2.statusCode).to.equal(301);
+            Code.expect(result2.headers.location).to.equal('/it/works');
             done();
           });
         });
@@ -380,8 +379,8 @@ lab.experiment('hapi-redirect', () => {
         vhosts: {
           'blahblah.com.localhost': {
             '/test': {
-                destination: '/newtest',
-                statusCode: 302
+              destination: '/newtest',
+              statusCode: 302
             },
             '/post/(.*)/': '/newtest',
             '/*': '/newtest',
