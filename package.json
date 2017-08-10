@@ -25,6 +25,7 @@
     "lab": "^13.0.1"
   },
   "dependencies": {
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "useragent": "^2.2.1"
   }
 }
