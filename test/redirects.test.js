@@ -72,6 +72,7 @@ lab.experiment('hapi-redirect', () => {
       });
     });
   });
+
   lab.test(' / -> /it/works?test=1', (done) => {
     server.register({
       register: redirectModule,
@@ -399,6 +400,43 @@ lab.experiment('hapi-redirect', () => {
         }, (result) => {
           Code.expect(result.statusCode).to.equal(302);
           Code.expect(result.headers.location).to.equal('/newtest');
+          done();
+        });
+      });
+    });
+  });
+
+  lab.test(' accepts a callback that adds additional dynamic routes', (done) => {
+    let count = 0;
+    server.register({
+      register: redirectModule,
+      options: {
+        log: true,
+        log404: true,
+        getRedirects(slug, redirectDone) {
+          count++;
+          return redirectDone(null, {
+            '/test': {
+              destination: `/newtest${count}`,
+              statusCode: 302
+            }
+          });
+        }
+      }
+    },
+    () => {
+      server.inject({
+        method: 'get',
+        url: '/test'
+      }, (result) => {
+        Code.expect(result.statusCode).to.equal(302);
+        Code.expect(result.headers.location).to.equal('/newtest1');
+        server.inject({
+          method: 'get',
+          url: '/test'
+        }, (result2) => {
+          Code.expect(result2.statusCode).to.equal(302);
+          Code.expect(result2.headers.location).to.equal('/newtest2');
           done();
         });
       });
