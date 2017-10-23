@@ -42,7 +42,7 @@ server.register([
         // callback takes any error as the first param and a list of route redirections as the second:
         return callback(null, [
           {
-            // will HTTP 302 redirect every request to a different route:
+            // this will HTTP 302 redirect every incoming request to '/dynamic-cats' to a different destination:
             '/dynamic-cats': {
               destination: '/cats/' + Math.random(),  
               statusCode: 302
