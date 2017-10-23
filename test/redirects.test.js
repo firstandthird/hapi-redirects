@@ -442,4 +442,31 @@ lab.experiment('hapi-redirect', () => {
       });
     });
   });
+
+  lab.test('emits event when redirect occurs', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+        redirects: {
+          '/test': '/it/works',
+          '/something/else': '/it/works'
+        },
+      }
+    },
+    () => {
+      server.on('redirect', (redirectInfo) => {
+        Code.expect(redirectInfo).to.equal('/it/works');
+        done();
+      });
+      server.start(() => {
+        server.inject({
+          method: 'get',
+          url: '/test'
+        }, (result) => {
+          Code.expect(result.statusCode).to.equal(301);
+          Code.expect(result.headers.location).to.equal('/it/works');
+        });
+      });
+    });
+  });
 });
