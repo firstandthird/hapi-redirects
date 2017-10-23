@@ -491,8 +491,7 @@ lab.experiment('hapi-redirect', () => {
           '/test': '/it/works',
         },
         getRedirects(pluginOptions, redirectDone) {
-          // dynamic method takes callback from the plugin:
-          Code.expect(pluginOptions.log).to.equal(true);
+          // duplicate will result in a 404:
           return redirectDone(null, {
             '/test': '/newtest'
           });
