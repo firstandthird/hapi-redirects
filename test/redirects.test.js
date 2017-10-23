@@ -413,6 +413,9 @@ lab.experiment('hapi-redirect', () => {
       options: {
         log: true,
         log404: true,
+        redirects: {
+          '/test301': '/it/works',
+        },
         getRedirects(slug, redirectDone) {
           count++;
           return redirectDone(null, {
@@ -437,7 +440,15 @@ lab.experiment('hapi-redirect', () => {
         }, (result2) => {
           Code.expect(result2.statusCode).to.equal(302);
           Code.expect(result2.headers.location).to.equal('/newtest2');
-          done();
+          // static routes still work:
+          server.inject({
+            method: 'get',
+            url: '/test301'
+          }, (result3) => {
+            Code.expect(result3.statusCode).to.equal(301);
+            Code.expect(result3.headers.location).to.equal('/it/works');
+            done();
+          });
         });
       });
     });
@@ -465,6 +476,25 @@ lab.experiment('hapi-redirect', () => {
         }, (result) => {
           Code.expect(result.statusCode).to.equal(301);
           Code.expect(result.headers.location).to.equal('/it/works');
+        });
+      });
+    });
+  });
+
+  lab.test(' returns 404 if no route or redirect matches', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+      }
+    },
+    () => {
+      server.start(() => {
+        server.inject({
+          method: 'get',
+          url: '/test'
+        }, (result) => {
+          Code.expect(result.statusCode).to.equal(404);
+          done();
         });
       });
     });
