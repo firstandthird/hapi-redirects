@@ -456,6 +456,60 @@ lab.experiment('hapi-redirect', () => {
     });
   });
 
+  lab.test(' will respond with error if additional route function returns error', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+        log: true,
+        log404: true,
+        redirects: {
+          '/test': '/it/works',
+        },
+        getRedirects(pluginOptions, redirectDone) {
+          return redirectDone(new Error('an error'));
+        }
+      }
+    },
+    () => {
+      server.inject({
+        method: 'get',
+        url: '/test'
+      }, (result) => {
+        Code.expect(result.statusCode).to.equal(404);
+        done();
+      });
+    });
+  });
+
+  lab.test(' will throw an error if dynamic routes clash with existing routes', (done) => {
+    server.register({
+      register: redirectModule,
+      options: {
+        log: true,
+        log404: true,
+        redirects: {
+          '/test': '/it/works',
+        },
+        getRedirects(pluginOptions, redirectDone) {
+          // dynamic method takes callback from the plugin:
+          Code.expect(pluginOptions.log).to.equal(true);
+          return redirectDone(null, {
+            '/test': '/newtest'
+          });
+        }
+      }
+    },
+    () => {
+      server.inject({
+        method: 'get',
+        url: '/test'
+      }, (result) => {
+        Code.expect(result.statusCode).to.equal(404);
+        done();
+      });
+    });
+  });
+
   lab.test('emits event when redirect occurs', (done) => {
     server.register({
       register: redirectModule,
