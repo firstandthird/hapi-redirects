@@ -3,7 +3,7 @@
   "description": "Hapi redirects",
   "author": "First+Third",
   "homepage": "https://github.com/firstandthird/hapi-redirects",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "main": "index.js",
   "repository": {
     "type": "git",
