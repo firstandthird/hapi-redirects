@@ -491,7 +491,7 @@ lab.experiment('hapi-redirect', () => {
           '/test': '/it/works',
         },
         getRedirects(pluginOptions, redirectDone) {
-          // duplicate will result in a 404:
+          // duplicate will result in a 500:
           return redirectDone(null, {
             '/test': '/newtest'
           });
@@ -503,7 +503,7 @@ lab.experiment('hapi-redirect', () => {
         method: 'get',
         url: '/test'
       }, (result) => {
-        Code.expect(result.statusCode).to.equal(404);
+        Code.expect(result.statusCode).to.equal(500);
         done();
       });
     });
