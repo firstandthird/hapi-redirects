@@ -416,7 +416,9 @@ lab.experiment('hapi-redirect', () => {
         redirects: {
           '/test301': '/it/works',
         },
-        getRedirects(slug, redirectDone) {
+        getRedirects(pluginOptions, redirectDone) {
+          // dynamic method takes callback from the plugin:
+          Code.expect(pluginOptions.log).to.equal(true);
           count++;
           return redirectDone(null, {
             '/test': {
