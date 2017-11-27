@@ -5,46 +5,44 @@ const server = new Hapi.Server({
   debug: {
     log: ['hapi-redirects', 'error'],
     request: ['tail', 'error']
-  }
+  },
+  port
 });
-server.connection({ port });
 
-server.register([
-  {
-    register: require('../'),
-    options: {
-      log: true,
-      log404: true,
-      redirects: {
-        '/test': '/it/works',
-        '/something/else': '/it/works',
-        '/': '/it/works?test=1',
-        '/test/{param*2}': '/newtest/{param*2}',
-        '/test302': {
-          destination: '/it/works',
-          statusCode: 302
-        }
-      },
-      vhosts: {
-        'blahblah.com.localhost': {
-          '/test': '/newtest',
-          '/post/(.*)/': '/newtest',
-          '/*': '/newtest',
+const f = async () => {
+  await server.register([
+    {
+      plugin: require('../'),
+      options: {
+        log: true,
+        log404: true,
+        redirects: {
+          '/test': '/it/works',
+          '/something/else': '/it/works',
+          '/': '/it/works?test=1',
+          '/test/{param*2}': '/newtest/{param*2}',
+          '/test302': {
+            destination: '/it/works',
+            statusCode: 302
+          }
+        },
+        vhosts: {
+          'blahblah.com.localhost': {
+            '/test': '/newtest',
+            '/post/(.*)/': '/newtest',
+            '/*': '/newtest',
+          }
         }
       }
     }
-  }
-], (err) => {
-  if (err) {
-    throw err;
-  }
+  ]);
 
   server.route([
     {
       method: 'GET',
       path: '/it/works',
       handler: (request, reply) => {
-        reply('redirects totally working');
+        return 'redirects totally working';
       }
     },
     {
@@ -52,7 +50,7 @@ server.register([
       path: '/newtest',
       handler: (request, reply) => {
         console.log(request.params);
-        reply('vhost redirects totally working ');
+        return 'vhost redirects totally working ';
       }
     },
     {
@@ -60,11 +58,12 @@ server.register([
       path: '/newtest/{param*2}',
       handler: (request, reply) => {
         console.log(request.params);
-        reply(`redirects totally working and param passed was ${request.params.param}`);
+        return `redirects totally working and param passed was ${request.params.param}`;
       }
     }
   ]);
-  server.start(() => {
-    console.log(`Hapi server started @ ${server.info.uri}`);
-  });
-});
+  await server.start();
+  console.log(`Hapi server started @ ${server.info.uri}`);
+};
+
+f();

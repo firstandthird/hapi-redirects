@@ -8,216 +8,179 @@ const redirectModule = require('../index.js');
 lab.experiment('hapi-redirect', () => {
   let server;
 
-  lab.beforeEach((done) => {
+  lab.beforeEach(async() => {
     server = new Hapi.Server();
-    server.connection();
     server.route([
       {
         method: 'GET',
         path: '/it/works',
-        handler: (request, reply) => {
-          reply('redirects totally working');
+        handler: (request, h) => {
+          return 'redirects totally working';
         }
       },
       {
         method: 'GET',
         path: '/newtest',
-        handler: (request, reply) => {
-          reply('vhost redirects totally working ');
+        handler: (request, h) => {
+          return 'vhost redirects totally working ';
         }
       },
       {
         method: 'GET',
         path: '/newtest/{param*2}',
-        handler: (request, reply) => {
-          reply(`redirects totally working and param passed was ${request.params.param}`);
+        handler: (request, h) => {
+          return `redirects totally working and param passed was ${request.params.param}`;
         }
       }
     ]);
 
-    server.start(done);
+    await server.start();
   });
 
-  lab.afterEach((done) => {
-    server.stop(done);
+  lab.afterEach(async() => {
+    await server.stop();
   });
 
-  lab.test(' /test -> /it/works   /something/else -> /it/works', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' /test -> /it/works   /something/else -> /it/works', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/test': '/it/works',
           '/something/else': '/it/works'
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/it/works');
-          server.inject({
-            method: 'get',
-            url: '/something/else'
-          }, (testResult) => {
-            Code.expect(testResult.statusCode).to.equal(301);
-            Code.expect(testResult.headers.location).to.equal('/it/works');
-            done();
-          });
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works');
+    const testResult = await server.inject({
+      method: 'get',
+      url: '/something/else'
+    });
+    Code.expect(testResult.statusCode).to.equal(301);
+    Code.expect(testResult.headers.location).to.equal('/it/works');
   });
 
-  lab.test(' / -> /it/works?test=1', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' / -> /it/works?test=1', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/': '/it/works?test=1',
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/it/works?test=1');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works?test=1');
   });
 
-  lab.test(' / -> /to/{params*}', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' / -> /to/{params*}', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         appendQueryString: false,
         redirects: {
           '/{params*}': '/to/{params*}',
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/some/params/here'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/to/some/params/here');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/some/params/here'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/to/some/params/here');
   });
 
-  lab.test(' /?query=1 -> /it/works?query=1', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' /?query=1 -> /it/works?query=1', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/': '/it/works',
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/?query=1'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/it/works?query=1');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/?query=1'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works?query=1');
   });
 
-  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/from/{param*}': '/to/{param*}',
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/from/test?query=1'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/to/test?query=1');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/from/test?query=1'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/to/test?query=1');
   });
 
-  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/from/{param*}': '/to/{param*}',
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/from/myParam?query=1'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/to/myParam?query=1');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/from/myParam?query=1'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/to/myParam?query=1');
   });
 
-  lab.test(' /test/{params*2} -> /newtest/{param*2}', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' /test/{params*2} -> /newtest/{param*2}', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/test/{param*2}': '/newtest/{param*2}'
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test/param1/param2',
-          headers: {
-            Host: 'en.example.com'
-          },
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test/param1/param2',
+      headers: {
+        Host: 'en.example.com'
+      },
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
   });
 
-  lab.test(' blahblah.localhost.com/test -> /newtest', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' blahblah.localhost.com/test -> /newtest', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         log: true,
         log404: true,
@@ -232,85 +195,70 @@ lab.experiment('hapi-redirect', () => {
           }
         }
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test',
-          headers: {
-            Host: 'blahblah.com.localhost'
-          }
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/newtest');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test',
+      headers: {
+        Host: 'blahblah.com.localhost'
+      }
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/newtest');
   });
 
-  lab.test('expose plugin', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test('expose plugin', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         log: true,
         log404: true
       }
-    }, () => {
-      server.plugins['hapi-redirects'].register({
-        redirects: {
-          '/test': '/it/works'
-        },
-        vhosts: {
-          'blahblah.com.localhost': {
-            '/test': '/newtest',
-          }
-        }
-      }, () => {
-        server.start(() => {
-          server.inject({
-            method: 'get',
-            url: '/test',
-            headers: {
-              Host: 'blahblah.com.localhost'
-            }
-          }, (result) => {
-            Code.expect(result.statusCode).to.equal(301);
-            Code.expect(result.headers.location).to.equal('/newtest');
-            done();
-          });
-        });
-      });
     });
+    server.plugins['hapi-redirects'].register({
+      redirects: {
+        '/test': '/it/works'
+      },
+      vhosts: {
+        'blahblah.com.localhost': {
+          '/test': '/newtest',
+        }
+      }
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test',
+      headers: {
+        Host: 'blahblah.com.localhost'
+      }
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/newtest');
   });
 
-  lab.test('set default status code', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test('set default status code', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         statusCode: 302,
         redirects: {
           '/': '/it/works',
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(302);
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/'
+    });
+    Code.expect(result.statusCode).to.equal(302);
   });
 
-  lab.test(' set status code for specific route (without params)', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' set status code for specific route (without params)', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/test301': '/it/works',
@@ -320,31 +268,25 @@ lab.experiment('hapi-redirect', () => {
           }
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test302'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(302);
-          Code.expect(result.headers.location).to.equal('/it/works');
-          server.inject({
-            method: 'get',
-            url: '/test301'
-          }, (result2) => {
-            Code.expect(result2.statusCode).to.equal(301);
-            Code.expect(result2.headers.location).to.equal('/it/works');
-            done();
-          });
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test302'
+    });
+    Code.expect(result.statusCode).to.equal(302);
+    Code.expect(result.headers.location).to.equal('/it/works');
+    const result2 = await server.inject({
+      method: 'get',
+      url: '/test301'
+    });
+    Code.expect(result2.statusCode).to.equal(301);
+    Code.expect(result2.headers.location).to.equal('/it/works');
   });
 
-  lab.test(' set status code for specific route (with params)', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' set status code for specific route (with params)', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/test/{param*2}': {
@@ -353,27 +295,22 @@ lab.experiment('hapi-redirect', () => {
           }
         },
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test/param1/param2',
-          headers: {
-            Host: 'en.example.com'
-          },
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(302);
-          Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test/param1/param2',
+      headers: {
+        Host: 'en.example.com'
+      },
+    });
+    Code.expect(result.statusCode).to.equal(302);
+    Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
   });
 
-  lab.test(' set status code for specific route (with vhost) ', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' set status code for specific route (with vhost) ', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         log: true,
         log404: true,
@@ -388,77 +325,66 @@ lab.experiment('hapi-redirect', () => {
           }
         }
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test',
-          headers: {
-            Host: 'blahblah.com.localhost'
-          }
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(302);
-          Code.expect(result.headers.location).to.equal('/newtest');
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test',
+      headers: {
+        Host: 'blahblah.com.localhost'
+      }
+    });
+    Code.expect(result.statusCode).to.equal(302);
+    Code.expect(result.headers.location).to.equal('/newtest');
   });
 
-  lab.test(' accepts a callback that adds additional dynamic routes', (done) => {
+  lab.test(' accepts a callback that adds additional dynamic routes', async() => {
     let count = 0;
-    server.register({
-      register: redirectModule,
+    await server.register({
+      plugin: redirectModule,
       options: {
         log: true,
         log404: true,
         redirects: {
           '/test301': '/it/works',
         },
-        getRedirects(pluginOptions, redirectDone) {
+        getRedirects: async (pluginOptions) => {
           // dynamic method takes callback from the plugin:
           Code.expect(pluginOptions.log).to.equal(true);
           count++;
-          return redirectDone(null, {
+          return {
             '/test': {
               destination: `/newtest${count}`,
               statusCode: 302
             }
-          });
+          };
         }
       }
-    },
-    () => {
-      server.inject({
-        method: 'get',
-        url: '/test'
-      }, (result) => {
-        Code.expect(result.statusCode).to.equal(302);
-        Code.expect(result.headers.location).to.equal('/newtest1');
-        server.inject({
-          method: 'get',
-          url: '/test'
-        }, (result2) => {
-          Code.expect(result2.statusCode).to.equal(302);
-          Code.expect(result2.headers.location).to.equal('/newtest2');
-          // static routes still work:
-          server.inject({
-            method: 'get',
-            url: '/test301'
-          }, (result3) => {
-            Code.expect(result3.statusCode).to.equal(301);
-            Code.expect(result3.headers.location).to.equal('/it/works');
-            done();
-          });
-        });
-      });
     });
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(302);
+    Code.expect(result.headers.location).to.equal('/newtest1');
+    const result2 = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result2.statusCode).to.equal(302);
+    Code.expect(result2.headers.location).to.equal('/newtest2');
+    // static routes still work:
+    const result3 = await server.inject({
+      method: 'get',
+      url: '/test301'
+    });
+    Code.expect(result3.statusCode).to.equal(301);
+    Code.expect(result3.headers.location).to.equal('/it/works');
   });
 
-  lab.test(' will respond with error if additional route function returns error', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' will respond with error if additional route function returns error', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         log: true,
         log404: true,
@@ -466,92 +392,74 @@ lab.experiment('hapi-redirect', () => {
           '/test': '/it/works',
         },
         getRedirects(pluginOptions, redirectDone) {
-          return redirectDone(new Error('an error'));
+          throw new Error('an error');
         }
       }
-    },
-    () => {
-      server.inject({
-        method: 'get',
-        url: '/test'
-      }, (result) => {
-        Code.expect(result.statusCode).to.equal(404);
-        done();
-      });
     });
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(404);
   });
 
-  lab.test(' will throw an error if dynamic routes clash with existing routes', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' will throw an error if dynamic routes clash with existing routes', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         log: true,
         log404: true,
         redirects: {
           '/test': '/it/works',
         },
-        getRedirects(pluginOptions, redirectDone) {
+        getRedirects(pluginOptions) {
           // duplicate will result in a 500:
-          return redirectDone(null, {
+          return {
             '/test': '/newtest'
-          });
+          };
         }
       }
-    },
-    () => {
-      server.inject({
-        method: 'get',
-        url: '/test'
-      }, (result) => {
-        Code.expect(result.statusCode).to.equal(500);
-        done();
-      });
     });
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(500);
   });
 
-  lab.test('emits event when redirect occurs', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test('emits event when redirect occurs', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
         redirects: {
           '/test': '/it/works',
           '/something/else': '/it/works'
         },
       }
-    },
-    () => {
-      server.on('redirect', (redirectInfo) => {
-        Code.expect(redirectInfo).to.equal('/it/works');
-        done();
-      });
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(301);
-          Code.expect(result.headers.location).to.equal('/it/works');
-        });
-      });
     });
+    server.events.on('redirect', async (redirectInfo) => {
+      Code.expect(redirectInfo).to.equal('/it/works');
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works');
   });
 
-  lab.test(' returns 404 if no route or redirect matches', (done) => {
-    server.register({
-      register: redirectModule,
+  lab.test(' returns 404 if no route or redirect matches', async() => {
+    await server.register({
+      plugin: redirectModule,
       options: {
       }
-    },
-    () => {
-      server.start(() => {
-        server.inject({
-          method: 'get',
-          url: '/test'
-        }, (result) => {
-          Code.expect(result.statusCode).to.equal(404);
-          done();
-        });
-      });
     });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(404);
   });
 });
