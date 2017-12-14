@@ -2,6 +2,7 @@
   "name": "hapi-redirects",
   "description": "Hapi redirects",
   "author": "First+Third",
+  "license": "MIT",
   "homepage": "https://github.com/firstandthird/hapi-redirects",
   "version": "5.0.0",
   "main": "index.js",
@@ -17,6 +18,9 @@
     "lint": "eslint **/*.js"
   },
   "devDependencies": {
+    "eslint": "^4.13.0",
+    "eslint-config-firstandthird": "^4.2.1",
+    "eslint-plugin-import": "^2.8.0",
     "code": "^5.1.2",
     "hapi": "^17.0.1",
     "lab": "^15.1.2"
