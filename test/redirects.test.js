@@ -256,6 +256,42 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.statusCode).to.equal(302);
   });
 
+  lab.test('set default status code with "temporary"', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        statusCode: 'temporary',
+        redirects: {
+          '/': '/it/works',
+        },
+      }
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/'
+    });
+    Code.expect(result.statusCode).to.equal(302);
+  });
+
+  lab.test('set default status code with "permanent"', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        statusCode: 'permanent',
+        redirects: {
+          '/': '/it/works',
+        },
+      }
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+  });
+
   lab.test(' set status code for specific route (without params)', async() => {
     await server.register({
       plugin: redirectModule,
