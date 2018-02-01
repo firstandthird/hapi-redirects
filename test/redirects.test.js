@@ -84,6 +84,24 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.headers.location).to.equal('/it/works?test=1');
   });
 
+  lab.test(' /?moniker=hugo -> /it/works?test=1&moniker=hugo', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        redirects: {
+          '/': '/it/works?test=1',
+        },
+      }
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/?moniker=hugo'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works?moniker=hugo&test=1');
+  });
+
   lab.test(' / -> /to/{params*}', async() => {
     await server.register({
       plugin: redirectModule,
