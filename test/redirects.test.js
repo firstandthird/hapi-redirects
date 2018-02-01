@@ -84,7 +84,7 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.headers.location).to.equal('/it/works?test=1');
   });
 
-  lab.test(' /?moniker=hugo -> /it/works?test=1&moniker=hugo', async() => {
+  lab.test(' /?moniker=hugo + /it/works?test=1 -> /it/works?test=1&moniker=hugo', async() => {
     await server.register({
       plugin: redirectModule,
       options: {
