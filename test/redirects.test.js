@@ -71,17 +71,17 @@ lab.experiment('hapi-redirect', () => {
       plugin: redirectModule,
       options: {
         redirects: {
-          '/test': 'https://google.com/'
+          '/test': 'https://google.com/?id=2'
         },
       }
     });
     await server.start();
     const result = await server.inject({
       method: 'get',
-      url: '/test'
+      url: '/test?token=1'
     });
     Code.expect(result.statusCode).to.equal(301);
-    Code.expect(result.headers.location).to.equal('https://google.com/');
+    Code.expect(result.headers.location).to.equal('https://google.com/?id=2&token=1');
   });
 
   lab.test(' / -> /it/works?test=1', async() => {
