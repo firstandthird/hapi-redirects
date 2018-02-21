@@ -4,7 +4,7 @@
   "author": "First+Third",
   "license": "MIT",
   "homepage": "https://github.com/firstandthird/hapi-redirects",
-  "version": "6.2.1",
+  "version": "6.2.2",
   "main": "index.js",
   "repository": {
     "type": "git",
