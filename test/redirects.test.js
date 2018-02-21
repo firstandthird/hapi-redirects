@@ -66,6 +66,24 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(testResult.headers.location).to.equal('/it/works');
   });
 
+  lab.test(' /test -> https://google.com', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        redirects: {
+          '/test': 'https://google.com/'
+        },
+      }
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('https://google.com/');
+  });
+
   lab.test(' / -> /it/works?test=1', async() => {
     await server.register({
       plugin: redirectModule,
