@@ -1,5 +1,5 @@
 'use strict';
-const Code = require('code');   // assertion library
+const Code = require('code'); // assertion library
 const Lab = require('lab');
 const lab = exports.lab = Lab.script();
 const Hapi = require('hapi');
@@ -533,5 +533,33 @@ lab.experiment('hapi-redirect', () => {
       url: '/test'
     });
     Code.expect(result.statusCode).to.equal(404);
+  });
+
+  lab.test(' logs output', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        redirects: {
+          '/': '/it/works?test=1',
+        },
+      }
+    });
+    await server.start();
+    let called = false;
+    server.events.on('log', (input, tags) => {
+      Code.expect(input.data.to).to.equal('/it/works?moniker=hugo&test=1');
+      Code.expect(input.data.from).to.equal('/?moniker=hugo');
+      Code.expect(input.data.referrer).to.equal('a wandering clown');
+      called = true;
+    });
+    await server.inject({
+      method: 'get',
+      headers: {
+        referrer: 'a wandering clown'
+      },
+      url: '/?moniker=hugo'
+    });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    Code.expect(called).to.equal(true);
   });
 });
