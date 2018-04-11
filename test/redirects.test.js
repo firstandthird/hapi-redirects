@@ -562,4 +562,30 @@ lab.experiment('hapi-redirect', () => {
     await new Promise(resolve => setTimeout(resolve, 500));
     Code.expect(called).to.equal(true);
   });
+
+  lab.test(' existing routes will return correctly', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        log: true,
+        log404: true,
+        redirects: {
+          '/test': '/it/works',
+        }
+      }
+    });
+    server.route({
+      method: 'GET',
+      path: '/test2',
+      handler() {
+        return 'ok';
+      }
+    });
+    const result = await server.inject({
+      method: 'get',
+      url: '/test2'
+    });
+    Code.expect(result.statusCode).to.equal(200);
+    Code.expect(result.result).to.equal('ok');
+  });
 });
