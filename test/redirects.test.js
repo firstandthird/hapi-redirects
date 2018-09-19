@@ -14,21 +14,21 @@ lab.experiment('hapi-redirect', () => {
       {
         method: 'GET',
         path: '/it/works',
-        handler: (request, h) => {
+        handler(request, h) {
           return 'redirects totally working';
         }
       },
       {
         method: 'GET',
         path: '/newtest',
-        handler: (request, h) => {
+        handler(request, h) {
           return 'vhost redirects totally working ';
         }
       },
       {
         method: 'GET',
         path: '/newtest/{param*2}',
-        handler: (request, h) => {
+        handler(request, h) {
           return `redirects totally working and param passed was ${request.params.param}`;
         }
       }
@@ -420,7 +420,7 @@ lab.experiment('hapi-redirect', () => {
         redirects: {
           '/test301': '/it/works',
         },
-        getRedirects: async (pluginOptions) => {
+        dynamicRedirects: (pluginOptions) => {
           // dynamic method takes callback from the plugin:
           Code.expect(pluginOptions.log).to.equal(true);
           count++;
@@ -463,7 +463,7 @@ lab.experiment('hapi-redirect', () => {
         redirects: {
           '/test': '/it/works',
         },
-        getRedirects(pluginOptions, redirectDone) {
+        dynamicRedirects(pluginOptions, redirectDone) {
           throw new Error('an error');
         }
       }
@@ -484,7 +484,7 @@ lab.experiment('hapi-redirect', () => {
         redirects: {
           '/test': '/it/works',
         },
-        getRedirects(pluginOptions) {
+        dynamicRedirects(pluginOptions) {
           // duplicate will result in a 500:
           return {
             '/test': '/newtest'
@@ -509,7 +509,7 @@ lab.experiment('hapi-redirect', () => {
         },
       }
     });
-    server.events.on('redirect', async (redirectInfo) => {
+    server.events.on('redirect', (redirectInfo) => {
       Code.expect(redirectInfo).to.equal('/it/works');
     });
     await server.start();
