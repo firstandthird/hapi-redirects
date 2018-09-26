@@ -14,21 +14,14 @@ lab.experiment('hapi-redirect', () => {
       {
         method: 'GET',
         path: '/it/works',
-        handler: (request, h) => {
+        handler(request, h) {
           return 'redirects totally working';
         }
       },
       {
         method: 'GET',
-        path: '/newtest',
-        handler: (request, h) => {
-          return 'vhost redirects totally working ';
-        }
-      },
-      {
-        method: 'GET',
         path: '/newtest/{param*2}',
-        handler: (request, h) => {
+        handler(request, h) {
           return `redirects totally working and param passed was ${request.params.param}`;
         }
       }
@@ -214,36 +207,6 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
   });
 
-  lab.test(' blahblah.localhost.com/test -> /newtest', async() => {
-    await server.register({
-      plugin: redirectModule,
-      options: {
-        log: true,
-        log404: true,
-        redirects: {
-          '/test': '/it/works'
-        },
-        vhosts: {
-          'blahblah.com.localhost': {
-            '/test': '/newtest',
-            '/post/(.*)/': '/newtest',
-            '/*': '/newtest',
-          }
-        }
-      }
-    });
-    await server.start();
-    const result = await server.inject({
-      method: 'get',
-      url: '/test',
-      headers: {
-        Host: 'blahblah.com.localhost'
-      }
-    });
-    Code.expect(result.statusCode).to.equal(301);
-    Code.expect(result.headers.location).to.equal('/newtest');
-  });
-
   lab.test('expose plugin', async() => {
     await server.register({
       plugin: redirectModule,
@@ -254,24 +217,19 @@ lab.experiment('hapi-redirect', () => {
     });
     server.plugins['hapi-redirects'].register({
       redirects: {
-        '/test': '/it/works'
-      },
-      vhosts: {
-        'blahblah.com.localhost': {
-          '/test': '/newtest',
+        '/test': {
+          destination: '/it/works',
+          statusCode: 301
         }
-      }
+      },
     });
     await server.start();
     const result = await server.inject({
       method: 'get',
       url: '/test',
-      headers: {
-        Host: 'blahblah.com.localhost'
-      }
     });
     Code.expect(result.statusCode).to.equal(301);
-    Code.expect(result.headers.location).to.equal('/newtest');
+    Code.expect(result.headers.location).to.equal('/it/works');
   });
 
   lab.test('set default status code', async() => {
@@ -380,36 +338,6 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.headers.location).to.equal('/newtest/param1/param2');
   });
 
-  lab.test(' set status code for specific route (with vhost) ', async() => {
-    await server.register({
-      plugin: redirectModule,
-      options: {
-        log: true,
-        log404: true,
-        vhosts: {
-          'blahblah.com.localhost': {
-            '/test': {
-              destination: '/newtest',
-              statusCode: 302
-            },
-            '/post/(.*)/': '/newtest',
-            '/*': '/newtest',
-          }
-        }
-      }
-    });
-    await server.start();
-    const result = await server.inject({
-      method: 'get',
-      url: '/test',
-      headers: {
-        Host: 'blahblah.com.localhost'
-      }
-    });
-    Code.expect(result.statusCode).to.equal(302);
-    Code.expect(result.headers.location).to.equal('/newtest');
-  });
-
   lab.test(' accepts a callback that adds additional dynamic routes', async() => {
     let count = 0;
     await server.register({
@@ -420,7 +348,7 @@ lab.experiment('hapi-redirect', () => {
         redirects: {
           '/test301': '/it/works',
         },
-        getRedirects: async (pluginOptions) => {
+        dynamicRedirects: (pluginOptions) => {
           // dynamic method takes callback from the plugin:
           Code.expect(pluginOptions.log).to.equal(true);
           count++;
@@ -460,10 +388,7 @@ lab.experiment('hapi-redirect', () => {
       options: {
         log: true,
         log404: true,
-        redirects: {
-          '/test': '/it/works',
-        },
-        getRedirects(pluginOptions, redirectDone) {
+        dynamicRedirects(pluginOptions, redirectDone) {
           throw new Error('an error');
         }
       }
@@ -475,7 +400,7 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.statusCode).to.equal(404);
   });
 
-  lab.test(' will throw an error if dynamic routes clash with existing routes', async() => {
+  lab.test(' static routes take precence when dynamic routes clash with existing routes', async() => {
     await server.register({
       plugin: redirectModule,
       options: {
@@ -484,7 +409,7 @@ lab.experiment('hapi-redirect', () => {
         redirects: {
           '/test': '/it/works',
         },
-        getRedirects(pluginOptions) {
+        dynamicRedirects(pluginOptions) {
           // duplicate will result in a 500:
           return {
             '/test': '/newtest'
@@ -496,7 +421,8 @@ lab.experiment('hapi-redirect', () => {
       method: 'get',
       url: '/test'
     });
-    Code.expect(result.statusCode).to.equal(500);
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works');
   });
 
   lab.test('emits event when redirect occurs', async() => {
@@ -509,7 +435,7 @@ lab.experiment('hapi-redirect', () => {
         },
       }
     });
-    server.events.on('redirect', async (redirectInfo) => {
+    server.events.on('redirect', (redirectInfo) => {
       Code.expect(redirectInfo).to.equal('/it/works');
     });
     await server.start();
