@@ -435,9 +435,11 @@ lab.experiment('hapi-redirect', () => {
         },
       }
     });
-    server.events.on('redirect', (redirectInfo) => {
-      Code.expect(redirectInfo).to.equal('/it/works');
+
+    server.events.on('redirect', (data) => {
+      Code.expect(data.fullRedirectLocation).to.equal('/it/works');
     });
+
     await server.start();
     const result = await server.inject({
       method: 'get',
