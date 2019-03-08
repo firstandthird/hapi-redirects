@@ -150,6 +150,24 @@ lab.experiment('hapi-redirect', () => {
     Code.expect(result.headers.location).to.equal('/it/works?query=1');
   });
 
+  lab.test(' test -> /it/works', async() => {
+    await server.register({
+      plugin: redirectModule,
+      options: {
+        redirects: {
+          test: '/it/works',
+        },
+      }
+    });
+    await server.start();
+    const result = await server.inject({
+      method: 'get',
+      url: '/test'
+    });
+    Code.expect(result.statusCode).to.equal(301);
+    Code.expect(result.headers.location).to.equal('/it/works');
+  });
+
   lab.test(' /from/{param}/?query=1 -> /to/{param}?query=1', async() => {
     await server.register({
       plugin: redirectModule,
