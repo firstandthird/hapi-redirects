@@ -18,16 +18,16 @@
     "lint": "eslint **/*.js"
   },
   "devDependencies": {
-    "eslint": "^4.13.0",
-    "eslint-config-firstandthird": "^4.2.1",
-    "eslint-plugin-import": "^2.8.0",
-    "code": "^5.1.2",
-    "hapi": "^17.0.1",
-    "lab": "^15.1.2"
+    "code": "^5.2.4",
+    "eslint": "^5.16.0",
+    "eslint-config-firstandthird": "^4.3.0",
+    "eslint-plugin-import": "^2.17.2",
+    "hapi": "^18.1.0",
+    "lab": "^18.0.2"
   },
   "dependencies": {
-    "call": "^5.0.0",
-    "query-string": "^5.0.0",
-    "useragent": "^2.2.1"
+    "call": "^5.0.3",
+    "query-string": "^6.5.0",
+    "useragent": "^2.3.0"
   }
 }
